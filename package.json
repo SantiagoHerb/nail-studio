@@ -1,0 +1,8 @@
+{
+  "name": "nail-studio",
+  "version": "1.0.0",
+  "description": "Agenda y contabilidad para nail studio",
+  "dependencies": {
+    "@vercel/kv": "^1.0.0"
+  }
+}
