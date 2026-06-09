@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Tatiana Nails">
+  <meta name="theme-color" content="#000000">
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="manifest" href="manifest.json">
+  <title>Tatiana Nails</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Playfair+Display:wght@500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    :root {
+      --pink: #D4537E; --pink-light: #FBEAF0; --pink-mid: #F4C0D1;
+      --gold: #BA7517; --gold-light: #FAEEDA;
+      --green: #3B6D11; --green-light: #EAF3DE;
+      --red: #A32D2D; --red-light: #FCEBEB;
+      --bg: #FDFBF9; --surface: #FFFFFF; --surface2: #F7F3F0;
+      --text: #2C1810; --text2: #8A7570; --text3: #C4B8B3;
+      --border: rgba(180,140,130,0.18); --border2: rgba(180,140,130,0.32);
+      --shadow: 0 2px 16px rgba(180,80,100,0.08);
+      --radius: 12px; --radius-sm: 8px; --radius-full: 999px;
+      --font: 'DM Sans', sans-serif; --font-display: 'Playfair Display', serif;
+      --nav-h: 68px;
+    }
+    html, body { height: 100%; background: var(--bg); font-family: var(--font); color: var(--text); }
+    body { overflow-x: hidden; }
+    #app { max-width: 430px; margin: 0 auto; min-height: 100%; padding-bottom: var(--nav-h); }
+
+    /* ── HEADER ── */
+    .page-header { padding: 20px 20px 12px; }
+    .page-header h1 { font-family: var(--font-display); font-size: 26px; font-weight: 500; color: var(--text); letter-spacing: -0.3px; }
+    .page-header p { font-size: 13px; color: var(--text2); margin-top: 2px; }
+
+    /* ── BOTTOM NAV ── */
+    .nav {
+      position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 100%; max-width: 430px; height: var(--nav-h);
+      background: var(--surface); border-top: 0.5px solid var(--border2);
+      display: flex; z-index: 50;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .nav-tab { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; cursor: pointer; color: var(--text3); transition: color .2s; padding-bottom: 4px; font-size: 11px; border: none; background: none; font-family: var(--font); }
+    .nav-tab svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+    .nav-tab.active { color: var(--pink); }
+    .nav-tab.active svg { stroke-width: 2; }
+
+    /* ── SECTIONS ── */
+    .section { display: none; padding: 0 16px; animation: fadeIn .2s ease; }
+    .section.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ── CARDS ── */
+    .card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 16px 18px; margin-bottom: 12px; box-shadow: var(--shadow); }
+
+    /* ── BUTTONS ── */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 10px 18px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; cursor: pointer; border: 0.5px solid var(--border2); background: var(--surface); color: var(--text); transition: all .15s; font-family: var(--font); line-height: 1; }
+    .btn:active { transform: scale(0.97); }
+    .btn-primary { background: var(--pink); color: white; border-color: var(--pink); }
+    .btn-primary:active { background: #b8426a; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .btn-icon { padding: 7px; border-radius: 8px; }
+    .btn-full { width: 100%; margin-bottom: 8px; }
+    .btn-danger { color: var(--red); border-color: rgba(163,45,45,.3); }
+
+    /* ── FORM ── */
+    .form-group { margin-bottom: 14px; }
+    .form-group:last-of-type { margin-bottom: 0; }
+    label { font-size: 12px; color: var(--text2); display: block; margin-bottom: 5px; font-weight: 500; letter-spacing: .3px; text-transform: uppercase; }
+    input[type=text], input[type=number], input[type=date], input[type=time], select, textarea {
+      width: 100%; padding: 11px 14px; border: 0.5px solid var(--border2);
+      border-radius: var(--radius-sm); font-size: 15px; background: var(--surface);
+      color: var(--text); font-family: var(--font); outline: none; transition: border .15s;
+      -webkit-appearance: none; appearance: none;
+    }
+    input:focus, select:focus { border-color: var(--pink); }
+    select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238A7570' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+
+    /* ── BADGES ── */
+    .badge { display: inline-block; padding: 4px 11px; border-radius: var(--radius-full); font-size: 11px; font-weight: 500; white-space: nowrap; }
+    .badge-pendiente { background: var(--gold-light); color: #6B3D0A; }
+    .badge-terminado { background: var(--green-light); color: var(--green); }
+    .badge-cancelado { background: var(--red-light); color: var(--red); }
+
+    /* ── FILTER TABS ── */
+    .filter-row { display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+    .filter-row::-webkit-scrollbar { display: none; }
+    .ftab { padding: 6px 14px; border-radius: var(--radius-full); font-size: 12px; font-weight: 500; cursor: pointer; border: 0.5px solid var(--border2); background: var(--surface); color: var(--text2); white-space: nowrap; transition: all .15s; }
+    .ftab.active { background: var(--pink-light); color: var(--pink); border-color: var(--pink-mid); }
+
+    /* ── SERVICIOS ── */
+    .service-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 0; border-bottom: 0.5px solid var(--border); }
+    .service-row:last-child { border-bottom: none; }
+    .service-name { font-size: 15px; font-weight: 500; }
+    .service-price { font-size: 15px; color: var(--pink); font-weight: 500; }
+
+    /* ── CALENDAR ── */
+    .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .cal-month { font-family: var(--font-display); font-size: 17px; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+    .cday-name { font-size: 11px; color: var(--text2); text-align: center; padding: 4px 0; font-weight: 500; }
+    .cday { text-align: center; padding: 8px 2px; border-radius: 8px; font-size: 13px; cursor: pointer; transition: background .12s; position: relative; user-select: none; }
+    .cday:active { background: var(--pink-mid); }
+    .cday.other { color: var(--text3); }
+    .cday.today { background: var(--pink); color: white; font-weight: 500; }
+    .cday.sel:not(.today) { background: var(--pink-light); color: var(--pink); font-weight: 500; }
+    .cday.dot::after { content: ''; position: absolute; bottom: 2px; left: 50%; transform: translateX(-50%); width: 4px; height: 4px; background: var(--gold); border-radius: 50%; }
+
+    /* ── CITAS LIST ── */
+    .appt { display: flex; align-items: flex-start; gap: 12px; padding: 13px 0; border-bottom: 0.5px solid var(--border); cursor: pointer; }
+    .appt:last-child { border-bottom: none; }
+    .appt-time { font-size: 12px; color: var(--text2); min-width: 42px; padding-top: 2px; font-weight: 500; }
+    .appt-body { flex: 1; min-width: 0; }
+    .appt-name { font-size: 15px; font-weight: 500; }
+    .appt-meta { font-size: 12px; color: var(--text2); margin-top: 3px; }
+
+    /* ── STATS ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; margin-bottom: 14px; }
+    .stat { background: var(--surface2); border-radius: var(--radius); padding: 14px; }
+    .stat-label { font-size: 11px; color: var(--text2); text-transform: uppercase; letter-spacing: .4px; font-weight: 500; margin-bottom: 6px; }
+    .stat-val { font-size: 22px; font-weight: 500; }
+    .stat-sub { font-size: 11px; color: var(--text2); margin-top: 3px; }
+
+    /* ── MODAL ── */
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(30,10,10,.45); z-index: 100; align-items: flex-end; justify-content: center; }
+    .overlay.open { display: flex; }
+    .modal {
+      background: var(--surface); border-radius: 20px 20px 0 0;
+      padding: 8px 18px 40px; width: 100%; max-width: 430px;
+      max-height: 90vh; overflow-y: auto;
+      padding-bottom: calc(32px + env(safe-area-inset-bottom));
+    }
+    .modal-pill { width: 40px; height: 4px; background: var(--border2); border-radius: 2px; margin: 12px auto 18px; }
+    .modal-title { font-family: var(--font-display); font-size: 18px; margin-bottom: 18px; }
+    .modal-actions { display: flex; gap: 8px; margin-top: 18px; }
+    .estado-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+
+    /* ── EMPTY ── */
+    .empty { text-align: center; padding: 36px 16px; color: var(--text2); font-size: 14px; }
+    .empty-icon { font-size: 36px; margin-bottom: 8px; }
+
+    /* ── TOAST ── */
+    .toast { position: fixed; bottom: calc(var(--nav-h) + 12px); left: 50%; transform: translateX(-50%); background: var(--text); color: white; padding: 10px 20px; border-radius: var(--radius-full); font-size: 13px; z-index: 200; opacity: 0; transition: opacity .3s; pointer-events: none; white-space: nowrap; box-shadow: 0 4px 20px rgba(0,0,0,.25); }
+    .toast.show { opacity: 1; }
+
+    /* ── LOADING ── */
+    .loading { text-align: center; padding: 24px; color: var(--text2); font-size: 13px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid var(--border2); border-top-color: var(--pink); border-radius: 50%; animation: spin .7s linear infinite; vertical-align: middle; margin-right: 6px; }
+
+    /* ── DIVIDER ── */
+    hr.div { border: none; border-top: 0.5px solid var(--border); margin: 14px 0; }
+
+    /* ── PWA INSTALL BANNER ── */
+    #install-banner { display: none; background: var(--pink-light); border: 0.5px solid var(--pink-mid); border-radius: var(--radius); padding: 12px 16px; margin: 0 16px 12px; font-size: 13px; color: var(--text); }
+    #install-banner strong { color: var(--pink); }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER dinámico -->
+  <div class="page-header">
+    <h1 id="page-title">Servicios</h1>
+    <p id="page-sub">Administra los servicios y precios</p>
+  </div>
+
+  <div id="install-banner">
+    💅 <strong>Instala la app:</strong> toca <strong>Compartir →</strong> luego <strong>"Añadir a pantalla de inicio"</strong> para usarla como app.
+  </div>
+
+  <!-- ══ SERVICIOS ══ -->
+  <div class="section active" id="sec-servicios">
+    <button class="btn btn-primary btn-full" onclick="openModal('m-servicio')">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nuevo servicio
+    </button>
+    <div class="card" id="lista-servicios"><div class="loading"><span class="spinner"></span>Cargando...</div></div>
+  </div>
+
+  <!-- ══ CITAS ══ -->
+  <div class="section" id="sec-citas">
+    <div class="filter-row" id="filter-citas">
+      <div class="ftab active" onclick="setFilter('dia',this)">Día</div>
+      <div class="ftab" onclick="setFilter('semana',this)">Semana</div>
+      <div class="ftab" onclick="setFilter('mes',this)">Mes</div>
+      <div class="ftab" onclick="setFilter('año',this)">Año</div>
+    </div>
+    <div class="card">
+      <div class="cal-nav">
+        <button class="btn btn-icon btn-sm" onclick="changeMonth(-1)">
+          <svg viewBox="0 0 24 24" width="18" height="18"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <span class="cal-month" id="cal-title"></span>
+        <button class="btn btn-icon btn-sm" onclick="changeMonth(1)">
+          <svg viewBox="0 0 24 24" width="18" height="18"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="openModal('m-cita')">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nueva cita
+    </button>
+    <div class="card">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px;font-weight:500;" id="citas-label">Citas de hoy</div>
+      <div id="lista-citas"><div class="loading"><span class="spinner"></span>Cargando...</div></div>
+    </div>
+  </div>
+
+  <!-- ══ CONTABILIDAD ══ -->
+  <div class="section" id="sec-contabilidad">
+    <div class="filter-row" id="filter-cont">
+      <div class="ftab active" onclick="setContFilter('mes',this)">Este mes</div>
+      <div class="ftab" onclick="setContFilter('semana',this)">Esta semana</div>
+      <div class="ftab" onclick="setContFilter('año',this)">Este año</div>
+      <div class="ftab" onclick="setContFilter('todo',this)">Todo</div>
+    </div>
+    <div class="stats-grid" id="stats-grid"></div>
+    <div class="card">
+      <div style="font-family:var(--font-display);font-size:16px;margin-bottom:14px;">Por servicio</div>
+      <div id="cont-detalle"><div class="loading"><span class="spinner"></span></div></div>
+    </div>
+  </div>
+
+  <!-- ══ BOTTOM NAV ══ -->
+  <nav class="nav">
+    <button class="nav-tab active" onclick="showSection('servicios')" id="tab-servicios">
+      <svg viewBox="0 0 24 24"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+      Servicios
+    </button>
+    <button class="nav-tab" onclick="showSection('citas')" id="tab-citas">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      Agenda
+    </button>
+    <button class="nav-tab" onclick="showSection('contabilidad')" id="tab-contabilidad">
+      <svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      Ingresos
+    </button>
+  </nav>
+</div>
+
+<!-- ══ MODAL SERVICIO ══ -->
+<div class="overlay" id="m-servicio" onclick="overlayClick(event,'m-servicio')">
+  <div class="modal">
+    <div class="modal-pill"></div>
+    <div class="modal-title">Nuevo servicio</div>
+    <div class="form-group">
+      <label>Nombre del servicio</label>
+      <input id="s-nombre" type="text" placeholder="Ej. Uñas acrílicas">
+    </div>
+    <div class="form-group">
+      <label>Precio (COP $)</label>
+      <input id="s-precio" type="number" placeholder="Ej. 80000" inputmode="numeric">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-full" onclick="closeModal('m-servicio')">Cancelar</button>
+      <button class="btn btn-primary btn-full" onclick="guardarServicio()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL CITA ══ -->
+<div class="overlay" id="m-cita" onclick="overlayClick(event,'m-cita')">
+  <div class="modal">
+    <div class="modal-pill"></div>
+    <div class="modal-title">Nueva cita</div>
+    <div class="form-group">
+      <label>Cliente</label>
+      <input id="c-cliente" type="text" placeholder="Nombre del cliente">
+    </div>
+    <div class="form-group">
+      <label>Servicio</label>
+      <select id="c-servicio"><option value="">Seleccionar servicio...</option></select>
+    </div>
+    <div class="form-group">
+      <label>Fecha</label>
+      <input id="c-fecha" type="date">
+    </div>
+    <div class="form-group">
+      <label>Hora</label>
+      <input id="c-hora" type="time">
+    </div>
+    <div class="form-group">
+      <label>Notas (opcional)</label>
+      <input id="c-notas" type="text" placeholder="Ej. Diseño con flores">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-full" onclick="closeModal('m-cita')">Cancelar</button>
+      <button class="btn btn-primary btn-full" onclick="guardarCita()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL ESTADO ══ -->
+<div class="overlay" id="m-estado" onclick="overlayClick(event,'m-estado')">
+  <div class="modal">
+    <div class="modal-pill"></div>
+    <div class="modal-title" id="m-estado-titulo">Cita</div>
+    <input type="hidden" id="e-id">
+    <div style="margin-bottom:14px;">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.4px;font-weight:500;">Estado actual</div>
+      <span id="e-badge-actual"></span>
+    </div>
+    <div>
+      <div style="font-size:12px;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px;font-weight:500;">Cambiar a</div>
+      <div class="estado-btns">
+        <button class="btn btn-sm" style="border-color:#EF9F27;color:#6B3D0A;" onclick="prepEstado('pendiente')">⏳ Pendiente</button>
+        <button class="btn btn-sm" style="border-color:#97C459;color:#3B6D11;" onclick="prepEstado('terminado')">✓ Terminado</button>
+        <button class="btn btn-sm" style="border-color:#F09595;color:#A32D2D;" onclick="prepEstado('cancelado')">✕ Cancelado</button>
+      </div>
+    </div>
+
+    <!-- Edición precio — solo visible al marcar terminado -->
+    <div id="precio-section" style="display:none;margin-top:16px;background:var(--pink-light);border-radius:var(--radius);padding:14px;">
+      <div style="font-size:13px;font-weight:500;color:var(--pink);margin-bottom:10px;">💅 Confirmar precio cobrado</div>
+      <div class="form-group" style="margin:0;">
+        <label>Precio final (COP $)</label>
+        <input id="e-precio" type="number" inputmode="numeric" placeholder="0">
+      </div>
+      <button class="btn btn-primary btn-full" style="margin-top:12px;margin-bottom:0;" onclick="confirmarTerminado()">
+        Confirmar servicio terminado
+      </button>
+    </div>
+
+    <hr class="div">
+    <button class="btn btn-danger btn-full" onclick="eliminarCita()">
+      <svg viewBox="0 0 24 24" width="16" height="16"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      Eliminar cita
+    </button>
+    <button class="btn btn-full" onclick="closeModal('m-estado')" style="margin-bottom:0;">Cerrar</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+// ── Estado global ──
+let servicios = [], citas = [];
+let calYear = new Date().getFullYear(), calMonth = new Date().getMonth();
+let selectedDay = null, activeFilter = 'dia', contFilter = 'mes';
+let pendingEstadoVal = null;
+
+// ── API helpers ──
+async function api(method, path, body) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch('/api' + path, opts);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json();
+}
+
+async function init() {
+  try {
+    [servicios, citas] = await Promise.all([
+      api('GET', '/servicios'),
+      api('GET', '/citas')
+    ]);
+  } catch(e) {
+    // Fallback a localStorage si la API falla
+    servicios = JSON.parse(localStorage.getItem('ns_servicios') || '[]');
+    citas = JSON.parse(localStorage.getItem('ns_citas') || '[]');
+    showToast('Modo offline — datos locales');
+  }
+  renderServicios();
+  renderCalendar();
+  renderContabilidad();
+  checkInstallBanner();
+}
+
+function saveLocal() {
+  localStorage.setItem('ns_servicios', JSON.stringify(servicios));
+  localStorage.setItem('ns_citas', JSON.stringify(citas));
+}
+
+// ── PWA install hint ──
+function checkInstallBanner() {
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const isStandalone = window.navigator.standalone;
+  if (isIOS && !isStandalone) document.getElementById('install-banner').style.display = 'block';
+}
+
+// ── Navegación ──
+const HEADERS = {
+  servicios: ['Servicios', 'Administra los servicios y precios'],
+  citas:     ['Agenda', 'Tus citas y calendario'],
+  contabilidad: ['Ingresos', 'Resumen financiero']
+};
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  document.getElementById('tab-' + id).classList.add('active');
+  document.getElementById('page-title').textContent = HEADERS[id][0];
+  document.getElementById('page-sub').textContent = HEADERS[id][1];
+  if (id === 'citas') renderCalendar();
+  if (id === 'contabilidad') renderContabilidad();
+}
+
+// ── Modales ──
+function openModal(id) {
+  if (id === 'm-cita') fillServiciosSelect();
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  document.getElementById('precio-section').style.display = 'none';
+  pendingEstadoVal = null;
+}
+function overlayClick(e, id) {
+  if (e.target === e.currentTarget) closeModal(id);
+}
+
+// ── Toast ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// ══ SERVICIOS ══
+async function guardarServicio() {
+  const nombre = document.getElementById('s-nombre').value.trim();
+  const precio = parseFloat(document.getElementById('s-precio').value);
+  if (!nombre || isNaN(precio) || precio < 0) { showToast('Completa todos los campos'); return; }
+  const s = { id: Date.now(), nombre, precio };
+  servicios.push(s);
+  saveLocal();
+  try { await api('POST', '/servicios', s); } catch(e) { showToast('Guardado offline'); }
+  document.getElementById('s-nombre').value = '';
+  document.getElementById('s-precio').value = '';
+  closeModal('m-servicio');
+  renderServicios();
+  showToast('Servicio guardado ✓');
+}
+
+async function eliminarServicio(id) {
+  if (!confirm('¿Eliminar este servicio?')) return;
+  servicios = servicios.filter(s => s.id !== id);
+  saveLocal();
+  try { await api('DELETE', '/servicios/' + id); } catch(e) {}
+  renderServicios();
+  showToast('Servicio eliminado');
+}
+
+function renderServicios() {
+  const el = document.getElementById('lista-servicios');
+  if (!servicios.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">💅</div>Aún no hay servicios.<br>¡Agrega el primero!</div>';
+    return;
+  }
+  el.innerHTML = servicios.map(s => `
+    <div class="service-row">
+      <div class="service-name">${esc(s.nombre)}</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span class="service-price">$${fmt(s.precio)}</span>
+        <button class="btn btn-icon btn-sm" onclick="eliminarServicio(${s.id})" aria-label="Eliminar">
+          <svg viewBox="0 0 24 24" width="15" height="15" style="stroke:var(--text2)"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        </button>
+      </div>
+    </div>`).join('');
+}
+
+function fillServiciosSelect() {
+  const sel = document.getElementById('c-servicio');
+  sel.innerHTML = '<option value="">Seleccionar servicio...</option>' +
+    servicios.map((s,i) => `<option value="${i}">${esc(s.nombre)} — $${fmt(s.precio)}</option>`).join('');
+  if (selectedDay) {
+    const pad = n => String(n).padStart(2,'0');
+    document.getElementById('c-fecha').value = `${calYear}-${pad(calMonth+1)}-${pad(selectedDay)}`;
+  }
+}
+
+// ══ CITAS ══
+async function guardarCita() {
+  const cliente = document.getElementById('c-cliente').value.trim();
+  const sIdx = document.getElementById('c-servicio').value;
+  const fecha = document.getElementById('c-fecha').value;
+  const hora = document.getElementById('c-hora').value;
+  const notas = document.getElementById('c-notas').value.trim();
+  if (!cliente || sIdx === '' || !fecha || !hora) { showToast('Completa todos los campos'); return; }
+  const s = servicios[parseInt(sIdx)];
+  const cita = { id: Date.now(), cliente, servicio: s.nombre, precio: s.precio, precioFinal: s.precio, fecha, hora, notas, estado: 'pendiente' };
+  citas.push(cita);
+  saveLocal();
+  try { await api('POST', '/citas', cita); } catch(e) {}
+  ['c-cliente','c-fecha','c-hora','c-notas'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('c-servicio').value = '';
+  closeModal('m-cita');
+  renderCalendar(); renderCitas();
+  showToast('Cita registrada ✓');
+}
+
+function renderCalendar() {
+  const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  document.getElementById('cal-title').textContent = MESES[calMonth] + ' ' + calYear;
+  const grid = document.getElementById('cal-grid');
+  const DIAS = ['Do','Lu','Ma','Mi','Ju','Vi','Sá'];
+  grid.innerHTML = DIAS.map(d => `<div class="cday-name">${d}</div>`).join('');
+  const first = new Date(calYear, calMonth, 1).getDay();
+  const total = new Date(calYear, calMonth+1, 0).getDate();
+  const hn = new Date();
+  const dotDays = new Set(citas
+    .filter(c => { const d = new Date(c.fecha+'T00:00:00'); return d.getFullYear()===calYear && d.getMonth()===calMonth; })
+    .map(c => +c.fecha.split('-')[2]));
+  for (let i=0; i<first; i++) grid.innerHTML += '<div class="cday other"></div>';
+  for (let d=1; d<=total; d++) {
+    const isToday = hn.getDate()===d && hn.getMonth()===calMonth && hn.getFullYear()===calYear;
+    const isSel = selectedDay===d;
+    const hasDot = dotDays.has(d);
+    grid.innerHTML += `<div class="cday${isToday?' today':''}${isSel&&!isToday?' sel':''}${hasDot?' dot':''}" onclick="selectDay(${d})">${d}</div>`;
+  }
+  renderCitas();
+}
+
+function selectDay(d) { selectedDay = d; renderCalendar(); }
+function changeMonth(dir) {
+  calMonth += dir;
+  if (calMonth>11){calMonth=0;calYear++;} if (calMonth<0){calMonth=11;calYear--;}
+  selectedDay=null; renderCalendar();
+}
+
+function setFilter(f, el) {
+  activeFilter = f;
+  document.querySelectorAll('#filter-citas .ftab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  if (f!=='dia') selectedDay=null;
+  renderCitas();
+}
+
+function renderCitas() {
+  const now = new Date();
+  let filtered;
+  const pad = n => String(n).padStart(2,'0');
+  if (activeFilter==='dia') {
+    const day = selectedDay||now.getDate();
+    const target = `${calYear}-${pad(calMonth+1)}-${pad(day)}`;
+    filtered = citas.filter(c => c.fecha===target);
+    document.getElementById('citas-label').textContent = selectedDay ? `Citas del ${selectedDay}` : 'Citas de hoy';
+  } else if (activeFilter==='semana') {
+    const s=new Date(now); s.setDate(now.getDate()-now.getDay());
+    const e=new Date(s); e.setDate(s.getDate()+6);
+    filtered=citas.filter(c=>{const d=new Date(c.fecha+'T00:00:00');return d>=s&&d<=e;});
+    document.getElementById('citas-label').textContent='Esta semana';
+  } else if (activeFilter==='mes') {
+    filtered=citas.filter(c=>{const d=new Date(c.fecha+'T00:00:00');return d.getMonth()===calMonth&&d.getFullYear()===calYear;});
+    document.getElementById('citas-label').textContent='Este mes';
+  } else {
+    filtered=citas.filter(c=>new Date(c.fecha+'T00:00:00').getFullYear()===calYear);
+    document.getElementById('citas-label').textContent='Año '+calYear;
+  }
+  filtered = [...filtered].sort((a,b)=>(a.fecha+a.hora).localeCompare(b.fecha+b.hora));
+  const el = document.getElementById('lista-citas');
+  if (!filtered.length) { el.innerHTML='<div class="empty"><div class="empty-icon">📅</div>No hay citas en este período</div>'; return; }
+  el.innerHTML = filtered.map(c => `
+    <div class="appt" onclick="abrirEstado('${c.id}')">
+      <div class="appt-time">${c.hora}</div>
+      <div class="appt-body">
+        <div class="appt-name">${esc(c.cliente)}</div>
+        <div class="appt-meta">${esc(c.servicio)} · $${fmt(c.precioFinal||c.precio)}${c.notas?` · ${esc(c.notas)}`:''}</div>
+      </div>
+      <span class="badge badge-${c.estado}">${estadoLabel(c.estado)}</span>
+    </div>`).join('');
+}
+
+function abrirEstado(id) {
+  const c = citas.find(x => String(x.id)===String(id));
+  if (!c) return;
+  document.getElementById('e-id').value = id;
+  document.getElementById('m-estado-titulo').textContent = c.cliente + ' — ' + c.servicio;
+  document.getElementById('e-badge-actual').innerHTML = `<span class="badge badge-${c.estado}">${estadoLabel(c.estado)}</span>`;
+  document.getElementById('e-precio').value = c.precioFinal||c.precio;
+  document.getElementById('precio-section').style.display = 'none';
+  pendingEstadoVal = null;
+  openModal('m-estado');
+}
+
+function prepEstado(estado) {
+  if (estado==='terminado') {
+    document.getElementById('precio-section').style.display = 'block';
+    pendingEstadoVal = 'terminado';
+  } else {
+    aplicarEstado(estado, null);
+  }
+}
+
+async function confirmarTerminado() {
+  const precio = parseFloat(document.getElementById('e-precio').value);
+  if (isNaN(precio)||precio<0) { showToast('Ingresa un precio válido'); return; }
+  await aplicarEstado('terminado', precio);
+}
+
+async function aplicarEstado(estado, precio) {
+  const id = document.getElementById('e-id').value;
+  const c = citas.find(x => String(x.id)===String(id));
+  if (!c) return;
+  c.estado = estado;
+  if (precio!==null) c.precioFinal = precio;
+  saveLocal();
+  try { await api('PATCH', '/citas/' + id, { estado, precioFinal: precio }); } catch(e) {}
+  renderCalendar(); renderCitas(); renderContabilidad();
+  closeModal('m-estado');
+  const msgs = { terminado:'¡Servicio terminado! 💅', cancelado:'Cita cancelada', pendiente:'Marcada como pendiente' };
+  showToast(msgs[estado]||'');
+}
+
+async function eliminarCita() {
+  if (!confirm('¿Eliminar esta cita?')) return;
+  const id = document.getElementById('e-id').value;
+  citas = citas.filter(x => String(x.id)!==String(id));
+  saveLocal();
+  try { await api('DELETE', '/citas/' + id); } catch(e) {}
+  renderCalendar(); renderCitas(); renderContabilidad();
+  closeModal('m-estado');
+  showToast('Cita eliminada');
+}
+
+// ══ CONTABILIDAD ══
+function setContFilter(f, el) {
+  contFilter = f;
+  document.querySelectorAll('#filter-cont .ftab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderContabilidad();
+}
+
+function renderContabilidad() {
+  const now = new Date();
+  let filtered = [...citas];
+  if (contFilter==='mes') filtered=citas.filter(c=>{const d=new Date(c.fecha+'T00:00:00');return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
+  else if (contFilter==='semana'){const s=new Date(now);s.setDate(now.getDate()-now.getDay());const e=new Date(s);e.setDate(s.getDate()+6);filtered=citas.filter(c=>{const d=new Date(c.fecha+'T00:00:00');return d>=s&&d<=e;});}
+  else if (contFilter==='año') filtered=citas.filter(c=>new Date(c.fecha+'T00:00:00').getFullYear()===now.getFullYear());
+
+  const hechos = filtered.filter(c=>c.estado==='terminado');
+  const pendientes = filtered.filter(c=>c.estado==='pendiente');
+  const cancelados = filtered.filter(c=>c.estado==='cancelado');
+  const total = hechos.reduce((s,c)=>s+(c.precioFinal||c.precio),0);
+  const esperado = pendientes.reduce((s,c)=>s+c.precio,0);
+
+  document.getElementById('stats-grid').innerHTML = `
+    <div class="stat"><div class="stat-label">Recaudado</div><div class="stat-val" style="color:var(--pink)">$${fmt(total)}</div><div class="stat-sub">${hechos.length} servicio${hechos.length!==1?'s':''}</div></div>
+    <div class="stat"><div class="stat-label">Por cobrar</div><div class="stat-val" style="color:var(--gold)">$${fmt(esperado)}</div><div class="stat-sub">${pendientes.length} pendiente${pendientes.length!==1?'s':''}</div></div>
+    <div class="stat"><div class="stat-label">Completadas</div><div class="stat-val">${hechos.length}</div></div>
+    <div class="stat"><div class="stat-label">Canceladas</div><div class="stat-val" style="color:var(--red)">${cancelados.length}</div></div>`;
+
+  const byS = {};
+  hechos.forEach(c=>{if(!byS[c.servicio])byS[c.servicio]={t:0,n:0};byS[c.servicio].t+=(c.precioFinal||c.precio);byS[c.servicio].n++;});
+  const entries = Object.entries(byS).sort((a,b)=>b[1].t-a[1].t);
+  const det = document.getElementById('cont-detalle');
+  if (!entries.length) { det.innerHTML='<div class="empty"><div class="empty-icon">📊</div>Sin servicios terminados</div>'; return; }
+  det.innerHTML = entries.map(([nombre,d])=>`
+    <div class="service-row">
+      <div><div class="service-name">${esc(nombre)}</div><div style="font-size:12px;color:var(--text2)">${d.n} vez${d.n!==1?'ces':''}</div></div>
+      <span class="service-price">$${fmt(d.t)}</span>
+    </div>`).join('');
+}
+
+// ── Utilidades ──
+const fmt = n => Math.round(n).toLocaleString('es-CO');
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const estadoLabel = e => ({pendiente:'Pendiente',terminado:'Terminado',cancelado:'Cancelado'})[e]||e;
+
+// ── Inicio ──
+
+// ── AUTH ──
+const PASS_HASH = '1eb6a430e1ae2a7f85d2d7509861c6bc4a8b92bfc2b4a8bd5d4a4e3b3aaaa5d0'; // "Jeronimo"
+const SESSION_KEY = 'tn_auth_session';
+
+async function sha256(msg) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+async function checkPassword() {
+  const val = document.getElementById('login-input').value;
+  const hash = await sha256(val);
+  // check against "Jeronimo"
+  if (val === 'Jeronimo') {
+    grantAccess(true);
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+    document.getElementById('login-input').value = '';
+    setTimeout(() => document.getElementById('login-error').style.display = 'none', 3000);
+  }
+}
+
+function grantAccess(saveSession) {
+  if (saveSession) sessionStorage.setItem(SESSION_KEY, '1');
+  document.getElementById('login-screen').style.display = 'none';
+  init();
+}
+
+async function tryBiometric() {
+  try {
+    const cred = await navigator.credentials.get({
+      publicKey: {
+        challenge: crypto.getRandomValues(new Uint8Array(32)),
+        timeout: 60000,
+        userVerification: 'required'
+      }
+    });
+    if (cred) grantAccess(true);
+  } catch(e) {
+    // biometric failed or not available, show password field
+    document.getElementById('faceid-btn').style.display = 'none';
+  }
+}
+
+async function registerBiometric() {
+  try {
+    await navigator.credentials.create({
+      publicKey: {
+        challenge: crypto.getRandomValues(new Uint8Array(32)),
+        rp: { name: 'Tatiana Nails' },
+        user: { id: new Uint8Array(16), name: 'tatiana', displayName: 'Tatiana' },
+        pubKeyCredParams: [{ type: 'public-key', alg: -7 }],
+        authenticatorSelection: { userVerification: 'required' },
+        timeout: 60000
+      }
+    });
+    localStorage.setItem('tn_biometric', '1');
+    showToast('Face ID activado ✓');
+  } catch(e) {}
+}
+
+function showLoginScreen() {
+  const ls = document.getElementById('login-screen');
+  ls.style.display = 'flex';
+  // Show biometric button if registered
+  if (localStorage.getItem('tn_biometric') === '1' && window.PublicKeyCredential) {
+    document.getElementById('faceid-btn').style.display = 'block';
+    // auto-trigger biometric
+    setTimeout(tryBiometric, 400);
+  }
+}
+
+// Check session on load
+if (sessionStorage.getItem(SESSION_KEY) === '1') {
+  // Already authenticated this session
+  init();
+} else {
+  showLoginScreen();
+}
+
+</script>
+
+<!-- ══ LOGIN SCREEN ══ -->
+<div id="login-screen" style="display:none;position:fixed;inset:0;z-index:999;background:#000;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;">
+  <img src="icon.png" style="width:120px;height:120px;border-radius:24px;margin-bottom:28px;" onerror="this.style.fontSize='60px';this.outerHTML='<div style=margin-bottom:28px;font-size:60px>💅</div>'">
+  <div style="font-family:Playfair Display,serif;font-size:26px;color:#C9A84C;margin-bottom:4px;text-align:center;">Tatiana Hernández</div>
+  <div style="font-size:12px;color:#555;letter-spacing:5px;margin-bottom:40px;">N A I L S</div>
+  <div id="login-error" style="display:none;background:#3a0000;color:#ff6b6b;padding:10px 16px;border-radius:8px;font-size:13px;margin-bottom:16px;width:100%;text-align:center;">Contraseña incorrecta</div>
+  <div style="width:100%;margin-bottom:12px;">
+    <input id="login-input" type="password" placeholder="Contraseña" autocomplete="current-password"
+      style="width:100%;padding:14px 16px;border-radius:10px;border:1px solid #333;background:#111;color:#fff;font-size:16px;text-align:center;letter-spacing:3px;font-family:sans-serif;"
+      onkeydown="if(event.key==='Enter') checkPassword()">
+  </div>
+  <button onclick="checkPassword()" style="width:100%;padding:14px;border-radius:10px;background:#C9A84C;color:#000;font-size:15px;font-weight:600;border:none;cursor:pointer;margin-bottom:16px;">Entrar</button>
+  <button id="faceid-btn" onclick="tryBiometric()" style="display:none;width:100%;padding:13px;border-radius:10px;background:transparent;color:#C9A84C;font-size:14px;font-weight:500;border:1px solid #333;cursor:pointer;">🔒 Face ID / Touch ID</button>
+</div>
+
+</body>
+</html>
