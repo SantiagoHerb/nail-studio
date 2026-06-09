@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="Nail Studio">
-  <meta name="theme-color" content="#D4537E">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Tatiana Nails">
+  <meta name="theme-color" content="#000000">
   <link rel="apple-touch-icon" href="icon.png">
   <link rel="manifest" href="manifest.json">
-  <title>Nail Studio</title>
+  <title>Tatiana Nails</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500&family=Playfair+Display:wght@500&display=swap" rel="stylesheet">
@@ -667,7 +667,103 @@ const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>
 const estadoLabel = e => ({pendiente:'Pendiente',terminado:'Terminado',cancelado:'Cancelado'})[e]||e;
 
 // ── Inicio ──
-init();
+
+// ── AUTH ──
+const PASS_HASH = '1eb6a430e1ae2a7f85d2d7509861c6bc4a8b92bfc2b4a8bd5d4a4e3b3aaaa5d0'; // "Jeronimo"
+const SESSION_KEY = 'tn_auth_session';
+
+async function sha256(msg) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+async function checkPassword() {
+  const val = document.getElementById('login-input').value;
+  const hash = await sha256(val);
+  // check against "Jeronimo"
+  if (val === 'Jeronimo') {
+    grantAccess(true);
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+    document.getElementById('login-input').value = '';
+    setTimeout(() => document.getElementById('login-error').style.display = 'none', 3000);
+  }
+}
+
+function grantAccess(saveSession) {
+  if (saveSession) sessionStorage.setItem(SESSION_KEY, '1');
+  document.getElementById('login-screen').style.display = 'none';
+  init();
+}
+
+async function tryBiometric() {
+  try {
+    const cred = await navigator.credentials.get({
+      publicKey: {
+        challenge: crypto.getRandomValues(new Uint8Array(32)),
+        timeout: 60000,
+        userVerification: 'required'
+      }
+    });
+    if (cred) grantAccess(true);
+  } catch(e) {
+    // biometric failed or not available, show password field
+    document.getElementById('faceid-btn').style.display = 'none';
+  }
+}
+
+async function registerBiometric() {
+  try {
+    await navigator.credentials.create({
+      publicKey: {
+        challenge: crypto.getRandomValues(new Uint8Array(32)),
+        rp: { name: 'Tatiana Nails' },
+        user: { id: new Uint8Array(16), name: 'tatiana', displayName: 'Tatiana' },
+        pubKeyCredParams: [{ type: 'public-key', alg: -7 }],
+        authenticatorSelection: { userVerification: 'required' },
+        timeout: 60000
+      }
+    });
+    localStorage.setItem('tn_biometric', '1');
+    showToast('Face ID activado ✓');
+  } catch(e) {}
+}
+
+function showLoginScreen() {
+  const ls = document.getElementById('login-screen');
+  ls.style.display = 'flex';
+  // Show biometric button if registered
+  if (localStorage.getItem('tn_biometric') === '1' && window.PublicKeyCredential) {
+    document.getElementById('faceid-btn').style.display = 'block';
+    // auto-trigger biometric
+    setTimeout(tryBiometric, 400);
+  }
+}
+
+// Check session on load
+if (sessionStorage.getItem(SESSION_KEY) === '1') {
+  // Already authenticated this session
+  init();
+} else {
+  showLoginScreen();
+}
+
 </script>
+
+<!-- ══ LOGIN SCREEN ══ -->
+<div id="login-screen" style="display:none;position:fixed;inset:0;z-index:999;background:#000;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;">
+  <img src="icon.png" style="width:120px;height:120px;border-radius:24px;margin-bottom:28px;" onerror="this.style.fontSize='60px';this.outerHTML='<div style=margin-bottom:28px;font-size:60px>💅</div>'">
+  <div style="font-family:Playfair Display,serif;font-size:26px;color:#C9A84C;margin-bottom:4px;text-align:center;">Tatiana Hernández</div>
+  <div style="font-size:12px;color:#555;letter-spacing:5px;margin-bottom:40px;">N A I L S</div>
+  <div id="login-error" style="display:none;background:#3a0000;color:#ff6b6b;padding:10px 16px;border-radius:8px;font-size:13px;margin-bottom:16px;width:100%;text-align:center;">Contraseña incorrecta</div>
+  <div style="width:100%;margin-bottom:12px;">
+    <input id="login-input" type="password" placeholder="Contraseña" autocomplete="current-password"
+      style="width:100%;padding:14px 16px;border-radius:10px;border:1px solid #333;background:#111;color:#fff;font-size:16px;text-align:center;letter-spacing:3px;font-family:sans-serif;"
+      onkeydown="if(event.key==='Enter') checkPassword()">
+  </div>
+  <button onclick="checkPassword()" style="width:100%;padding:14px;border-radius:10px;background:#C9A84C;color:#000;font-size:15px;font-weight:600;border:none;cursor:pointer;margin-bottom:16px;">Entrar</button>
+  <button id="faceid-btn" onclick="tryBiometric()" style="display:none;width:100%;padding:13px;border-radius:10px;background:transparent;color:#C9A84C;font-size:14px;font-weight:500;border:1px solid #333;cursor:pointer;">🔒 Face ID / Touch ID</button>
+</div>
+
 </body>
 </html>
