@@ -339,6 +339,21 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- ══ LOGIN SCREEN ══ -->
+<div id="login-screen" style="display:none;position:fixed;inset:0;z-index:999;background:#000;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;">
+  <img src="icon.png" style="width:120px;height:120px;border-radius:24px;margin-bottom:28px;">
+  <div style="font-family:'Playfair Display',serif;font-size:26px;color:#C9A84C;margin-bottom:4px;text-align:center;">Tatiana Hernández</div>
+  <div style="font-size:12px;color:#555;letter-spacing:5px;margin-bottom:40px;">N A I L S</div>
+  <div id="login-error" style="display:none;background:#3a0000;color:#ff6b6b;padding:10px 16px;border-radius:8px;font-size:13px;margin-bottom:16px;width:100%;text-align:center;">Contraseña incorrecta</div>
+  <div style="width:100%;margin-bottom:12px;">
+    <input id="login-input" type="password" placeholder="Contraseña" autocomplete="current-password"
+      style="width:100%;padding:14px 16px;border-radius:10px;border:1px solid #333;background:#111;color:#fff;font-size:16px;text-align:center;letter-spacing:3px;font-family:sans-serif;"
+      onkeydown="if(event.key==='Enter') checkPassword()">
+  </div>
+  <button onclick="checkPassword()" style="width:100%;padding:14px;border-radius:10px;background:#C9A84C;color:#000;font-size:15px;font-weight:600;border:none;cursor:pointer;margin-bottom:16px;">Entrar</button>
+  <button id="faceid-btn" onclick="tryBiometric()" style="display:none;width:100%;padding:13px;border-radius:10px;background:transparent;color:#C9A84C;font-size:14px;font-weight:500;border:1px solid #333;cursor:pointer;">🔒 Face ID / Touch ID</button>
+</div>
+
 <script>
 'use strict';
 
@@ -749,21 +764,5 @@ if (sessionStorage.getItem(SESSION_KEY) === '1') {
 }
 
 </script>
-
-<!-- ══ LOGIN SCREEN ══ -->
-<div id="login-screen" style="display:none;position:fixed;inset:0;z-index:999;background:#000;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;">
-  <img src="icon.png" style="width:120px;height:120px;border-radius:24px;margin-bottom:28px;" onerror="this.style.fontSize='60px';this.outerHTML='<div style=margin-bottom:28px;font-size:60px>💅</div>'">
-  <div style="font-family:Playfair Display,serif;font-size:26px;color:#C9A84C;margin-bottom:4px;text-align:center;">Tatiana Hernández</div>
-  <div style="font-size:12px;color:#555;letter-spacing:5px;margin-bottom:40px;">N A I L S</div>
-  <div id="login-error" style="display:none;background:#3a0000;color:#ff6b6b;padding:10px 16px;border-radius:8px;font-size:13px;margin-bottom:16px;width:100%;text-align:center;">Contraseña incorrecta</div>
-  <div style="width:100%;margin-bottom:12px;">
-    <input id="login-input" type="password" placeholder="Contraseña" autocomplete="current-password"
-      style="width:100%;padding:14px 16px;border-radius:10px;border:1px solid #333;background:#111;color:#fff;font-size:16px;text-align:center;letter-spacing:3px;font-family:sans-serif;"
-      onkeydown="if(event.key==='Enter') checkPassword()">
-  </div>
-  <button onclick="checkPassword()" style="width:100%;padding:14px;border-radius:10px;background:#C9A84C;color:#000;font-size:15px;font-weight:600;border:none;cursor:pointer;margin-bottom:16px;">Entrar</button>
-  <button id="faceid-btn" onclick="tryBiometric()" style="display:none;width:100%;padding:13px;border-radius:10px;background:transparent;color:#C9A84C;font-size:14px;font-weight:500;border:1px solid #333;cursor:pointer;">🔒 Face ID / Touch ID</button>
-</div>
-
 </body>
 </html>
