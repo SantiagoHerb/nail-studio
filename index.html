@@ -92,6 +92,13 @@
     .filter-row::-webkit-scrollbar { display: none; }
     .ftab { padding: 6px 14px; border-radius: var(--radius-full); font-size: 12px; font-weight: 500; cursor: pointer; border: 0.5px solid var(--border2); background: var(--surface); color: var(--text2); white-space: nowrap; transition: all .15s; }
     .ftab.active { background: var(--pink-light); color: var(--pink); border-color: var(--pink-mid); }
+    #cont-date-picker input, #cont-date-picker select {
+      width: 100%; padding: 11px 14px; border: 0.5px solid var(--border2);
+      border-radius: var(--radius-sm); font-size: 15px; background: var(--surface);
+      color: var(--text); font-family: var(--font); outline: none;
+      -webkit-appearance: none; appearance: none;
+    }
+    #cont-date-picker input:focus, #cont-date-picker select:focus { border-color: var(--pink); }
 
     /* ── SERVICIOS ── */
     .service-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 0; border-bottom: 0.5px solid var(--border); }
@@ -216,11 +223,13 @@
   <!-- ══ CONTABILIDAD ══ -->
   <div class="section" id="sec-contabilidad">
     <div class="filter-row" id="filter-cont">
-      <div class="ftab active" onclick="setContFilter('mes',this)">Este mes</div>
-      <div class="ftab" onclick="setContFilter('semana',this)">Esta semana</div>
-      <div class="ftab" onclick="setContFilter('año',this)">Este año</div>
+      <div class="ftab" onclick="setContFilter('dia',this)">Día</div>
+      <div class="ftab" onclick="setContFilter('semana',this)">Semana</div>
+      <div class="ftab active" onclick="setContFilter('mes',this)">Mes</div>
+      <div class="ftab" onclick="setContFilter('año',this)">Año</div>
       <div class="ftab" onclick="setContFilter('todo',this)">Todo</div>
     </div>
+    <div id="cont-date-picker" style="display:none;margin-bottom:14px;"></div>
     <div class="stats-grid" id="stats-grid"></div>
     <div class="card">
       <div style="font-family:var(--font-display);font-size:16px;margin-bottom:14px;">Por servicio</div>
@@ -386,6 +395,7 @@ async function init() {
   }
   renderServicios();
   renderCalendar();
+  renderDatePicker();
   renderContabilidad();
   checkInstallBanner();
 }
@@ -416,7 +426,7 @@ function showSection(id) {
   document.getElementById('page-title').textContent = HEADERS[id][0];
   document.getElementById('page-sub').textContent = HEADERS[id][1];
   if (id === 'citas') renderCalendar();
-  if (id === 'contabilidad') renderContabilidad();
+  if (id === 'contabilidad') { renderDatePicker(); renderContabilidad(); }
 }
 
 // ── Modales ──
@@ -638,19 +648,75 @@ async function eliminarCita() {
 }
 
 // ══ CONTABILIDAD ══
+let contDate = new Date(); // selected reference date/month/year for filters
+
 function setContFilter(f, el) {
   contFilter = f;
   document.querySelectorAll('#filter-cont .ftab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
+  renderDatePicker();
+  renderContabilidad();
+}
+
+function renderDatePicker() {
+  const wrap = document.getElementById('cont-date-picker');
+  const pad = n => String(n).padStart(2,'0');
+  if (contFilter === 'dia' || contFilter === 'semana') {
+    const val = `${contDate.getFullYear()}-${pad(contDate.getMonth()+1)}-${pad(contDate.getDate())}`;
+    let extra = '';
+    if (contFilter === 'semana') {
+      const s = new Date(contDate); s.setDate(contDate.getDate()-contDate.getDay());
+      const e = new Date(s); e.setDate(s.getDate()+6);
+      const f = d => `${pad(d.getDate())}/${pad(d.getMonth()+1)}`;
+      extra = `<div style="font-size:12px;color:var(--text2);margin-top:6px;">Semana: ${f(s)} — ${f(e)}</div>`;
+    }
+    wrap.innerHTML = `<input type="date" value="${val}" onchange="onContDateChange(this.value)">${extra}`;
+    wrap.style.display = 'block';
+  } else if (contFilter === 'mes') {
+    const val = `${contDate.getFullYear()}-${pad(contDate.getMonth()+1)}`;
+    wrap.innerHTML = `<input type="month" value="${val}" onchange="onContMonthChange(this.value)">`;
+    wrap.style.display = 'block';
+  } else if (contFilter === 'año') {
+    const y = contDate.getFullYear();
+    let opts = '';
+    for (let yr = y+1; yr >= y-6; yr--) opts += `<option value="${yr}" ${yr===y?'selected':''}>${yr}</option>`;
+    wrap.innerHTML = `<select onchange="onContYearChange(this.value)">${opts}</select>`;
+    wrap.style.display = 'block';
+  } else {
+    wrap.style.display = 'none';
+    wrap.innerHTML = '';
+  }
+}
+
+function onContDateChange(val) {
+  contDate = new Date(val + 'T00:00:00');
+  renderContabilidad();
+}
+function onContMonthChange(val) {
+  const [y,m] = val.split('-');
+  contDate = new Date(parseInt(y), parseInt(m)-1, 1);
+  renderContabilidad();
+}
+function onContYearChange(val) {
+  contDate = new Date(parseInt(val), contDate.getMonth(), 1);
   renderContabilidad();
 }
 
 function renderContabilidad() {
-  const now = new Date();
   let filtered = [...citas];
-  if (contFilter==='mes') filtered=citas.filter(c=>{const d=new Date(c.fecha+'T00:00:00');return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
-  else if (contFilter==='semana'){const s=new Date(now);s.setDate(now.getDate()-now.getDay());const e=new Date(s);e.setDate(s.getDate()+6);filtered=citas.filter(c=>{const d=new Date(c.fecha+'T00:00:00');return d>=s&&d<=e;});}
-  else if (contFilter==='año') filtered=citas.filter(c=>new Date(c.fecha+'T00:00:00').getFullYear()===now.getFullYear());
+  const pad = n => String(n).padStart(2,'0');
+  if (contFilter==='dia') {
+    const target = `${contDate.getFullYear()}-${pad(contDate.getMonth()+1)}-${pad(contDate.getDate())}`;
+    filtered = citas.filter(c => c.fecha === target);
+  } else if (contFilter==='mes') {
+    filtered=citas.filter(c=>{const d=new Date(c.fecha+'T00:00:00');return d.getMonth()===contDate.getMonth()&&d.getFullYear()===contDate.getFullYear();});
+  } else if (contFilter==='semana'){
+    const s=new Date(contDate);s.setDate(contDate.getDate()-contDate.getDay());const e=new Date(s);e.setDate(s.getDate()+6);
+    filtered=citas.filter(c=>{const d=new Date(c.fecha+'T00:00:00');return d>=s&&d<=e;});
+  } else if (contFilter==='año') {
+    filtered=citas.filter(c=>new Date(c.fecha+'T00:00:00').getFullYear()===contDate.getFullYear());
+  }
+  // 'todo' -> no filter
 
   const hechos = filtered.filter(c=>c.estado==='terminado');
   const pendientes = filtered.filter(c=>c.estado==='pendiente');
